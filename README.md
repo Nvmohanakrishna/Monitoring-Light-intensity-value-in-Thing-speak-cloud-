@@ -90,9 +90,74 @@ Prototype and build IoT systems without setting up servers or developing web sof
 
  
 # PROGRAM:
+```
+#define ldr_pin 34
+#define led_pin 2
+#include <WiFi.h>
+#include "ThingSpeak.h"
+#define ldr_pin 34
+char ssid[] = "North Remembers";
+char pass[] = "winterfell";
+WiFiClient  client;
+unsigned long myChannelNumber = 3115112;
+const int ChannelField = 1;
+const char * myWriteAPIKey = "QCS03309HYKDQ34W";
+int ldrValue = 0;
+int lightPercentage = 0;
+const int darkValue = 4095;
+const int brightValue = 0;  
+void setup() 
+{
+  Serial.begin(115200);
+  pinMode(ldr_pin, INPUT);
+  pinMode(led_pin, OUTPUT);
+  WiFi.mode(WIFI_STA);   
+  ThingSpeak.begin(client);
+}
+
+void loop() 
+{
+  if(WiFi.status() != WL_CONNECTED)
+{
+    Serial.print("Attempting to connect to SSID: ");
+    
+    while(WiFi.status() != WL_CONNECTED)
+    {
+      WiFi.begin(ssid, pass); 
+      Serial.print(".");
+      delay(5000);     
+    } 
+    Serial.println("\nConnected.");
+  }
+  int ldrValue= analogRead(ldr_pin);
+  lightPercentage = map(ldrValue, darkValue, brightValue, 0, 100);
+  lightPercentage = constrain(lightPercentage, 0, 100);
+  Serial.println("Intensity=");
+  Serial.println(lightPercentage);    
+  Serial.println("%");
+  ThingSpeak.writeField(myChannelNumber, ChannelField, lightPercentage, myWriteAPIKey);
+  if(lightPercentage<50)
+  {
+    digitalWrite(led_pin,HIGH);
+  }
+  else
+  {
+    digitalWrite(led_pin,LOW);
+  }
+  delay(5000); 
+}
+```
 # CIRCUIT DIAGRAM:
+![WIN_20251014_12_08_13_Pro](https://github.com/user-attachments/assets/86cecd77-fe94-4541-9542-b97e21d3197f)
+
+
 # OUTPUT:
+<img width="1140" height="1156" alt="Screenshot 2025-10-14 120739" src="https://github.com/user-attachments/assets/aac3fddc-68cf-4c88-9466-b534cd788b4d" />
+
+
 # RESULT:
+<img width="1919" height="1199" alt="Screenshot 2025-10-14 120722" src="https://github.com/user-attachments/assets/941a8762-23da-442f-b11c-c99c0a352186" />
+
 
 Thus the light intensity values are updated in the Thing speak cloud using ESP32 controller.
 
